@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>jQuery dynform plugin</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/3.1.1/yeti/bootstrap.min.css">
+
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.dynform.js"></script>
+
+    <style>
+    .dynform {
+      background-color: #EEE;
+    }
+    .dynform .form-group input {
+      background-color: #CCC;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <header class="col-md-12">
+          <h1 class="page-header"><a name="top">jQuery dynform plugin</a></h1>
+        </header>
+      </div>
+      <div class="row">
+        <nav class="col-md-3">
+        </nav>
+        <div class="col-md-9">
+
+          <h2>Default configuration</h2>
+          <form class="form">
+            <div class="form-group">
+              <label for="standardInput1">Standard input</label>
+              <input type="text" class="form-control" id="standardInput1" placeholder="Standard input">
+            </div>
+
+            <div id="dynform1" class="dynform">
+              <div class="form-group">
+                <label for="replicatedInput">Replicated Input {#}</label>
+                <input type="text" class="form-control dynform-trigger" id="replicatedInput" placeholder="Replicated Input {#}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="standardInput2">Standard input</label>
+              <input type="text" class="form-control" id="standardInput2" placeholder="Standard input">
+            </div>
+
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+
+          <script>
+            $(function() {
+              $("#dynform1").dynform();
+            });
+          </script>
+
+          <hr />
+
+          <h2>Callbacks</h2>
+          <form class="form">
+            <div class="form-group">
+              <label for="standardInput4">Standard input</label>
+              <input type="text" class="form-control" id="standardInput4" placeholder="Standard input">
+            </div>
+
+            <div id="dynform2" class="dynform">
+              <div class="form-group">
+                <label for="replicatedInput">Replicated Input {#}</label>
+                <input type="text" class="form-control dynform-trigger" id="replicatedInput" placeholder="Replicated Input {#}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="standardInput5">Standard input</label>
+              <input type="text" class="form-control" id="standardInput5" placeholder="Standard input">
+            </div>
+
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+
+          <script>
+            $(function() {
+              $("#dynform2").dynform({
+                callback: {
+                  add: function(new_element) {
+                    // Add a maximum of 5 elements to the form
+                    if( $(this).children().length < 5 )
+                      return true;
+                    else
+                      return false;
+                  },
+                  rm: function( removed_elements ) {
+                    // Always keeps the first element
+                    return removed_elements.filter(function(el, i) {
+                      return !$(el).is(':first-child');
+                    });
+                  },
+                  renumber: function(no, element) {
+                    // renumber labels each time a replicated element is removed
+                    $('label', element).text('Replicated Input '+no);
+                    $('input', element).attr('placeholder', 'Replicated Input '+no);
+                  }
+                }
+              });
+            });
+          </script>
+
+          <hr />
+
+          <h2>Remove check and events</h2>
+          <form class="form">
+            <div class="form-group">
+              <label for="standardInput8">Standard input</label>
+              <input type="text" class="form-control" id="standardInput8" placeholder="Standard input">
+            </div>
+
+            <div id="dynform3" class="dynform">
+              <div class="form-group">
+                <label for="replicatedInput2-">Replicated Input {#}</label>
+                <input type="text" class="form-control dynform-trigger" id="replicatedInput2-" placeholder="Replicated Input {#}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="standardInput10">Standard input</label>
+              <input type="text" class="form-control" id="standardInput10" placeholder="Standard input">
+            </div>
+
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+
+          <script>
+            $(function() {
+              $("#dynform3").dynform({
+                callback: {
+                  renumber: function(no, element) {
+                    // renumber labels each time a replicated element is removed
+                    $('label', element).text('Replicated Input '+no);
+                    $('input', element).attr('placeholder', 'Replicated Input '+no);
+                  }
+                },
+                check: function(triggers, element) {
+                    // only remove is input contains string "del"
+                    return ($(triggers).val() === 'del');
+                },
+                events: {
+                  // Elements are added if the last input is clicked
+                  add: ['mousedown'],
+                  // remove is invoked if any other input is clicked
+                  // e.g. tabbing will not trigger the remove handler
+                  rm: ['mousedown']
+                }
+              });
+            });
+          </script>
+
+          <hr />
+
+          <h2>Custom template with multiple elements and triggers</h2>
+          <form class="form">
+            <div class="form-group">
+              <label for="standardInput12">Standard input</label>
+              <input type="text" class="form-control" id="standardInput12" placeholder="Standard input">
+            </div>
+
+            <div id="dynform4" class="dynform">
+              <div>
+                <div class="form-group col-sm-4">
+                  <input type="text" class="form-control dynform-trigger" id="replicatedInput31-" placeholder="Replicated Input {#} Trigger 1">
+                </div>
+                <div class="form-group col-sm-4">
+                  <input type="text" class="form-control" id="replicatedInput32-" placeholder="Replicated Input {#} Input">
+                </div>
+                <div class="form-group col-sm-4">
+                  <input type="text" class="form-control dynform-trigger" id="replicatedInput33-" placeholder="Replicated Input {#} Trigger 2">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+
+          <script>
+            $(function() {
+              $("#dynform4").dynform();
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
