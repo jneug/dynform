@@ -30,7 +30,11 @@
         </nav>
         <div class="col-md-9">
 
-          <h2>Default configuration</h2>
+          <h2>1. Default configuration</h2>
+          <div class="well">
+            <p>This example shows the default options with the maximum number of replicated elements set to 5.
+            Start typing in the second input to see the plugin in action.</p>
+          </div>
           <form class="form">
             <div class="form-group">
               <label for="standardInput1">Standard input</label>
@@ -54,13 +58,20 @@
 
           <script>
             $(function() {
-              $("#dynform1").dynform();
+              $("#dynform1").dynform({max: 5});
             });
           </script>
 
           <hr />
 
-          <h2>Callbacks</h2>
+          <h2>2. Callbacks</h2>
+          <div class="well">
+            <p>The plugin supports a set of callback for various actions: adding and
+            removing an element and renumbering.
+            The first two are called right before the action takes place and may
+            veto the change. The third is called once for every element while renumbering
+            to allow for custom changes to text.</p>
+          </div>
           <form class="form">
             <div class="form-group">
               <label for="standardInput4">Standard input</label>
@@ -86,21 +97,24 @@
             $(function() {
               $("#dynform2").dynform({
                 callback: {
+                  // Add a maximum of 5 elements to the form
+                  // Essentially the same as {max: 5} in example 1
                   add: function(new_element) {
-                    // Add a maximum of 5 elements to the form
                     if( $(this).children().length < 5 )
                       return true;
                     else
                       return false;
                   },
+                  // Always keeps the first element
+                  // removed_elements is an array, usefull in
+                  // combination with custom events (see example 3)
                   rm: function( removed_elements ) {
-                    // Always keeps the first element
                     return removed_elements.filter(function(el, i) {
                       return !$(el).is(':first-child');
                     });
                   },
+                  // Renumber the labels each time a replicated element is removed
                   renumber: function(no, element) {
-                    // renumber labels each time a replicated element is removed
                     $('label', element).text('Replicated Input '+no);
                     $('input', element).attr('placeholder', 'Replicated Input '+no);
                   }
@@ -111,7 +125,18 @@
 
           <hr />
 
-          <h2>Remove check and events</h2>
+          <h2>3. Custom check and events</h2>
+          <div class="well">
+            <p>If an element should be deleted is decided by the <code>check</code> callback. By
+            default all triggers of an element have to be empty for the element to be
+            removed. If you want more complex logic, you can add your own check.</p>
+            <p>You can also change the events that trigger the addition and removal
+            of elements. By default, adding is invoked on "change" and "keypress" events,
+            and removing on "change", to avoid too much flickering of elements.</p>
+            <p>Try clicking multiple times on the last replicated input. Then type
+            <code>del</code> in the first and use <code>TAB</code> to jump to the
+            next. Repeat. Then click one of the inputs (not the last).</p>
+          </div>
           <form class="form">
             <div class="form-group">
               <label for="standardInput8">Standard input</label>
@@ -137,14 +162,14 @@
             $(function() {
               $("#dynform3").dynform({
                 callback: {
+                  // Renumber labels (looks nicer)
                   renumber: function(no, element) {
-                    // renumber labels each time a replicated element is removed
                     $('label', element).text('Replicated Input '+no);
                     $('input', element).attr('placeholder', 'Replicated Input '+no);
                   }
                 },
+                // Only remove if input contains string "del"
                 check: function(triggers, element) {
-                    // only remove is input contains string "del"
                     return ($(triggers).val() === 'del');
                 },
                 events: {
@@ -160,33 +185,29 @@
 
           <hr />
 
-          <h2>Custom template with multiple elements and triggers</h2>
+          <h2>4. Custom template with multiple elements and triggers</h2>
+          <div class="well">
+            <p>By default the complete contents of the dynform element is used
+            as the element template, but you can define others in the <code>tpl</code>
+            option. The template may contain multiple inputs and each of these may
+            be an trigger for the replication.</p>
+          </div>
           <form class="form">
             <div class="form-group">
               <label for="standardInput12">Standard input</label>
               <input type="text" class="form-control" id="standardInput12" placeholder="Standard input">
             </div>
 
-            <div id="dynform4" class="dynform">
-              <div>
-                <div class="form-group col-sm-4">
-                  <input type="text" class="form-control dynform-trigger" id="replicatedInput31-" placeholder="Replicated Input {#} Trigger 1">
-                </div>
-                <div class="form-group col-sm-4">
-                  <input type="text" class="form-control" id="replicatedInput32-" placeholder="Replicated Input {#} Input">
-                </div>
-                <div class="form-group col-sm-4">
-                  <input type="text" class="form-control dynform-trigger" id="replicatedInput33-" placeholder="Replicated Input {#} Trigger 2">
-                </div>
-              </div>
-            </div>
+            <div id="dynform4" class="dynform"></div>
 
             <button type="submit" class="btn btn-default">Submit</button>
           </form>
 
           <script>
             $(function() {
-              $("#dynform4").dynform();
+              $("#dynform4").dynform({
+                tpl: '<div><div class="form-group col-sm-4"><input type="text" class="form-control dynform-trigger" id="replicatedInput31-" placeholder="Input {#} Trigger 1"></div><div class="form-group col-sm-4"><input type="text" class="form-control" id="replicatedInput32-" placeholder="Input {#} No Trigger"></div><div class="form-group col-sm-4"><input type="text" class="form-control dynform-trigger" id="replicatedInput33-" placeholder="Input {#} Trigger 2"></div></div>'
+              });
             });
           </script>
         </div>
