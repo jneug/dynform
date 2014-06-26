@@ -49,18 +49,20 @@ dynform can be initialised with various options:
 
 	Default:
 
-		{
-			events: {
-				add: ['change', 'keypress'],
-				rm: ['change']
-			}
+	```JSON
+	{
+		events: {
+			add: ['change', 'keypress'],
+			rm: ['change']
 		}
+	}
+	```
 * **callback** - *Object*
 
 	Can have three keys with callback functions as values: `add`, `rm` and `renumber`.
  * **add** - *Function*
 
- 	```javascript
+ 	```JavaScript
  	add: function(new_element) { return true; }
  	```
 
@@ -69,17 +71,23 @@ dynform can be initialised with various options:
  	new element as an argument. It may veto the addition by returning false.
  * **rm** - *Function*
 
- 			rm: function(removed_elements){ return removed_elements; }
+ 	```JavaScript
+ 	rm: function(removed_elements){ return removed_elements; }
+	```
 
  	The `rm` callback is invoked when replicated elements are about to get removed from the dynform. It will receive all elements the will get removed as an array. It may veto the removal by removing elements from and returning the truncated array.
  * **renumber** - *Function*
 
-			renumber: function(no, element){}
+	```JavaScript
+	renumber: function(no, element){}
+	```
 
 	The `renumber` callback is called once for every element when the element ids are renumbered. It will receive the number of the element and the element itself as arguments. This callback is useful for also renumbering labels and other custom text inside the form.
 * **keep** - *Function*
 
-		keep: function(triggers, element) { return boolean; }
+	```JavaScript
+	keep: function(triggers, element) { return boolean; }
+	```
 
 	The `keep` function is used to decide if an element should be removed from the dynform or not. By default the plugin will check every trigger of the element for its value and if they all are empty the element is removed. For more complex behavior (e.g. checking inputs that are not triggers themselves) you can provide your own logic here.
 
