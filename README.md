@@ -60,19 +60,21 @@ dynform can be initialised with various options:
 	Can have three keys with callback functions as values: `add`, `rm` and `renumber`.
  * **add** - *Function*
 
- 		add: function(new_element) { return true; }
+ 	```javascript
+ 	add: function(new_element) { return true; }
+ 	```
 
  	The `add` callback is invoked every time a new element is about to be added,
  	but before the element is actually appended. The callback will receive the
  	new element as an argument. It may veto the addition by returning false.
  * **rm** - *Function*
 
- 		rm: function(removed_elements){ return removed_elements; }
+ 			rm: function(removed_elements){ return removed_elements; }
 
  	The `rm` callback is invoked when replicated elements are about to get removed from the dynform. It will receive all elements the will get removed as an array. It may veto the removal by removing elements from and returning the truncated array.
  * **renumber** - *Function*
 
-		renumber: function(no, element){}
+			renumber: function(no, element){}
 
 	The `renumber` callback is called once for every element when the element ids are renumbered. It will receive the number of the element and the element itself as arguments. This callback is useful for also renumbering labels and other custom text inside the form.
 * **keep** - *Function*
