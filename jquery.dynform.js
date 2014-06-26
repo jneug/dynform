@@ -5,11 +5,16 @@
     - Store element reference in triggers and use throughout?
     - Should callbacks be called before or after elements are added/removed/renumbered etc.
       - Currently they are called before adding/renumbering -> collision of rm with check
-    - Use check to decide if elements should be added (!check([new_element]))? Or new callnack?
-    - Add max optio?
     - bind triggers to input elements (others make no sense)?
   FIX:
     - Press key (element gets replicated) and then backspace (input is empty) does not trigger rm event
+    - With max option set and max replicated elements, after removing one, a new one should be added if necessary
+  FIXED:
+    - add max option
+    - renamed check to keep
+    - renumber ALL ids in tpl!!
+    - Use check to decide if elements should be added (!check([new_element]))?
+    - what if template has more than 1 elements? Then dynform.children() does not work!
 */
 
 (function($) {
@@ -24,27 +29,27 @@
                     return;
 
                 var opts = $.extend({}, $.fn.dynform.defaults, options);
+
                 opts.tpl = opts.tpl || $(this).html();
+                if ($(opts.tpl).children().length > 1)
+                    opts.tpl = '<div>' + opts.children + '</div>'
+
                 if (opts.callback.add)
                     opts.callback.add = opts.callback.add.bind(this);
                 if (opts.callback.rm)
                     opts.callback.rm = opts.callback.rm.bind(this);
                 if (opts.callback.renumber)
                     opts.callback.renumber = opts.callback.renumber.bind(this);
-                if (opts.check)
-                    opts.check = opts.check.bind(this);
+                if (opts.keep)
+                    opts.keep = opts.keep.bind(this);
 
-                opts.inputids = [];
-                $('input', opts.tpl).each(function(i, e) {
-                    e = $(e);
-                    if (e.attr('id'))
-                        opts.inputids.push(e.attr('id'));
+                opts.allids = [];
+                $('[id]', opts.tpl).each(function(i, e) {
+                    opts.allids.push($(e).attr('id'));
                 });
-                opts.labelids = [];
-                $('label', opts.tpl).each(function(i, e) {
-                    e = $(e);
-                    if (e.attr('for'))
-                        opts.labelids.push(e.attr('for'));
+                opts.allfors = [];
+                $('label[for]', opts.tpl).each(function(i, e) {
+                    opts.allfors.push($(e).attr('for'));
                 });
 
                 this.dynformOpts = opts;
@@ -59,7 +64,16 @@
             var dynform = this.dynform || this;
             var opts = dynform.dynformOpts;
 
+            if (opts.max && $(dynform).children().length >= opts.max)
+                return;
+
             if (!this.dynformElement || !$(this.dynformElement).next().length) {
+                // if (this.dynformElement) {
+                //     if (!opts.keep($(opts.trigger, this.dynformElement), this.dynformElement)) {
+                //         return;
+                //     }
+                // }
+
                 var new_elem = $.dynform.maketpl(dynform, opts);
 
                 var do_add = true;
@@ -68,7 +82,7 @@
 
                 if (do_add) {
                     $(dynform).append(new_elem);
-                    $.dynform.renumber_ids(dynform, opts);
+                    $.dynform.renumber(dynform, opts);
                     $.dynform.setup_handlers(dynform, opts);
                 }
             }
@@ -80,7 +94,7 @@
 
             var rm = [];
             $(dynform).children().not(':last').each(function(i, el) {
-                if (opts.check($(opts.trigger, el), el)) {
+                if (!opts.keep($(opts.trigger, el), el)) {
                     rm.push(el);
                 }
             });
@@ -92,14 +106,14 @@
                 $.each(rm, function(i, el) {
                     $(el).remove();
                 })
-                $.dynform.renumber_ids(dynform, opts);
+                $.dynform.renumber(dynform, opts);
                 $.dynform.setup_handlers(dynform, opts);
             }
         },
 
         maketpl: function(dynform, opts) {
             var no = $(dynform).children().length + 1;
-            var new_tpl = $(opts.tpl.replace(opts.number_tpl, no));
+            var new_tpl = $(opts.tpl.replace(/{#}/g, no));
             $(opts.trigger, new_tpl).each(function(i, e) {
                 e.dynform = dynform;
                 e.dynformElement = new_tpl;
@@ -126,18 +140,15 @@
             });
         },
 
-        renumber_ids: function(dynform, opts) {
+        renumber: function(dynform, opts) {
             $(dynform).children().each(function(i, e) {
                 var no = i + 1;
-                $('input', e).each(function(j, input) {
-                    input = $(input);
-                    if (input.attr('id'))
-                        input.attr('id', opts.inputids[j] + no);
+
+                $('[id]', e).each(function(j, el) {
+                    $(el).attr('id', opts.allids[j] + no);
                 });
-                $('label', e).each(function(j, label) {
-                    label = $(label);
-                    if (label.attr('for'))
-                        label.attr('for', opts.labelids[j] + no);
+                $('label[for]', e).each(function(j, label) {
+                    $(label).attr('for', opts.allfors[j] + no);
                 });
 
                 if (opts.callback.renumber)
@@ -151,7 +162,6 @@
     $.fn.dynform.defaults = {
         //tpl: '',
         trigger: '.dynform-trigger',
-        number_tpl: /{#}/g,
         events: {
             add: ['change', 'keypress'],
             rm: ['change']
@@ -161,12 +171,12 @@
             //  rm: function(removed_elements){ return removed_elements },
             //  renumber: function(no, element){}
         },
-        check: function(triggers, element) {
-            var remove = true;
+        keep: function(triggers, element) {
+            var keep = true;
             $(triggers).each(function(i, input) {
-                remove = remove & ($(input).val().trim().length <= 0);
+                keep = keep & ($(input).val().trim().length > 0);
             });
-            return remove;
+            return keep;
         }
     };
 }(jQuery));
